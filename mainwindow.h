@@ -6,6 +6,12 @@
 #include <QMessageBox>
 #include <QDragEnterEvent>
 #include <QMimeData>
+#include <QProcess>
+#include <QString>
+#include <QStringList>
+#include <QDebug>
+#include <QMessageBox>
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -20,9 +26,15 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void getFileHash(const QFileInfo &fileInfo,const QString &hashType);
 protected:
     void dragEnterEvent(QDragEnterEvent *event);
     void dropEvent(QDropEvent *event);
+private slots:
+    void on_hashTypeComboBox_currentIndexChanged(int index);
+
+    void on_btnVerify_clicked();
+
 private:
     Ui::MainWindow *ui;
 
