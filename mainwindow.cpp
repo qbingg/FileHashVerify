@@ -12,6 +12,19 @@ MainWindow::MainWindow(QWidget *parent)
     ui->fileHashLineEdit->setReadOnly(true);
     ui->hashTypeComboBox->addItem("MD5");
     ui->hashTypeComboBox->addItem("SHA256");
+
+
+    //初始化QSettings
+    QString appDirPath = QCoreApplication::applicationDirPath();// 获取exe所在目录
+    QString configFilePath = appDirPath + "/config.ini";
+    // 检查配置文件是否存在
+    // QFile::exists(config_path);
+    // 初始化QSettings（即使文件不存在，QSettings也会在写入时自动创建）
+    m_settings = new QSettings(configFilePath, QSettings::IniFormat);
+    // 设置组织名和应用名（影响INI文件的[General]部分）
+    m_settings->setFallbacksEnabled(false); // 禁用回退到系统注册表
+
+    readSettings();
 }
 
 MainWindow::~MainWindow()
@@ -69,6 +82,26 @@ void MainWindow::getFileHash(const QFileInfo &fileInfo, const QString &hashType)
 
 }
 
+void MainWindow::readSettings()
+{
+    const auto geometry = m_settings->value("geometry", QByteArray()).toByteArray();
+    if (!geometry.isEmpty())
+        restoreGeometry(geometry);
+
+    const auto hashTypeIndex = m_settings->value("hashTypeIndex", 0);
+    if (!hashTypeIndex.isNull())
+        ui->hashTypeComboBox->setCurrentIndex(hashTypeIndex.toInt());
+}
+
+void MainWindow::writeSettings()
+{
+    // 将“窗口位置和大小”写入ini
+    m_settings->setValue("geometry", saveGeometry());
+
+    //保存hashType的索引index
+    m_settings->setValue("hashTypeIndex", ui->hashTypeComboBox->currentIndex());
+}
+
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
     if (event->mimeData()->hasUrls())
@@ -105,6 +138,12 @@ void MainWindow::dropEvent(QDropEvent *event)
     setWindowTitle(m_fileInfo.absoluteFilePath());
 
     getFileHash(m_fileInfo,ui->hashTypeComboBox->currentText());
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    // 关闭窗口时，将“窗口位置和大小”写入ini
+    writeSettings();
 }
 
 void MainWindow::on_hashTypeComboBox_currentIndexChanged(int index)
