@@ -2,8 +2,8 @@
 拖拽放入文件，选择哈希码类型，校验与输入的哈希码是否一致
 
 ## 环境
-Qt6.5.3
-powershell
+- Qt6.5.3
+- powershell
 
 ## 构建编译运行
 使用QtCreator打开FileHashVerify.pro，编译即可
