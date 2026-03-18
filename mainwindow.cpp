@@ -172,3 +172,14 @@ void MainWindow::on_btnVerify_clicked()
     }
 }
 
+void MainWindow::setFileInfo(const QFileInfo &newFileInfo)
+{
+    m_fileInfo = newFileInfo;
+
+    //获取文件信息，并显示到标题栏上
+    setWindowTitle(m_fileInfo.absoluteFilePath());
+
+    getFileHash(m_fileInfo,ui->hashTypeComboBox->currentText());
+
+}
+

@@ -30,6 +30,8 @@ public:
 
     void readSettings();
     void writeSettings();
+    void setFileInfo(const QFileInfo &newFileInfo);
+
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dropEvent(QDropEvent *event) override;
