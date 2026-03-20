@@ -164,7 +164,8 @@ void MainWindow::on_btnVerify_clicked()
     if((fileHash.isEmpty())||(inputHash.isEmpty()))
         return;
 
-    if(fileHash == inputHash){
+    int x = QString::compare(fileHash, inputHash, Qt::CaseInsensitive);  // x == 0
+    if(x == 0){
         QMessageBox::information(this, "", "相等");
     }
     else{
