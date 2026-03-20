@@ -10,8 +10,9 @@ MainWindow::MainWindow(QWidget *parent)
     setAcceptDrops(true);// 开启对整个窗口的拖放操作的支持
 
     ui->fileHashLineEdit->setReadOnly(true);
-    ui->hashTypeComboBox->addItem("MD5");
     ui->hashTypeComboBox->addItem("SHA256");
+    ui->hashTypeComboBox->addItem("MD5");
+
 
 
     //初始化QSettings
@@ -76,7 +77,9 @@ void MainWindow::getFileHash(const QFileInfo &fileInfo, const QString &hashType)
             QMessageBox::information(this, "错误", error);
         }
         process->deleteLater();
+        ui->btnSaveHash->setDisabled(false);
     });
+    ui->btnSaveHash->setDisabled(true);//获取新文件哈希码时，禁止保存
     process->start();
     ui->statusbar->showMessage("正在获取hash码");
 
@@ -182,5 +185,58 @@ void MainWindow::setFileInfo(const QFileInfo &newFileInfo)
 
     getFileHash(m_fileInfo,ui->hashTypeComboBox->currentText());
 
+}
+
+
+void MainWindow::on_btnSaveHash_clicked()
+{
+    if(!m_fileInfo.exists()){
+        QMessageBox::warning(this, "warning", "请拖入有效的文件");
+        return;
+    }
+
+    if(ui->fileHashLineEdit->text().isEmpty()){
+        QMessageBox::warning(this, "warning", "文件哈希码一栏为空");
+        return;
+    }
+
+    QStringList hashFilePath;
+    hashFilePath << m_fileInfo.absolutePath() << "/" //获取文件的绝对路径
+                 << m_fileInfo.fileName()
+                 << "." << ui->hashTypeComboBox->currentText()
+                 << ".txt";
+
+    qDebug()<<"你好："<<hashFilePath.join("");
+
+    QFile file(hashFilePath.join(""));
+    // 2. 以“只写+截断”模式打开文件（核心模式）
+    // WriteOnly：只写模式（无法读取）
+    // Truncate：若文件存在则清空内容（覆盖），不存在则创建
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text)) {
+        qDebug() << "文件打开失败：" << file.errorString();
+        return;
+    }
+
+    // 3. 写入内容
+    QTextStream out(&file);
+    out << ui->fileHashLineEdit->text();
+
+    // 4. 刷新并关闭文件（QFile析构时会自动关闭，但显式关闭更规范）
+    out.flush();
+    file.close();
+
+    // 检查关闭后是否有错误
+    if (file.error() != QFile::NoError) {
+        qDebug() << "文件写入/关闭失败：" << file.errorString();
+        return;
+    }
+
+    qDebug() << "文件写入成功：";// << filePath;
+    QMessageBox::information(this, "warning",
+                             QString("%1的哈希码保存成功。\n\n%2：\n\n%3")
+                                 .arg(m_fileInfo.fileName())
+                                 .arg(ui->hashTypeComboBox->currentText())
+                                 .arg(ui->fileHashLineEdit->text())
+                             );
 }
 

@@ -41,6 +41,8 @@ private slots:
 
     void on_btnVerify_clicked();
 
+    void on_btnSaveHash_clicked();
+
 private:
     Ui::MainWindow *ui;
 
